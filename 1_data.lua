@@ -111,6 +111,10 @@ testData.data = testData.data:float()
 print '==> preprocessing data: normalize globally'
 mean = trainData.data[{ {},1,{},{} }]:mean()
 std = trainData.data[{ {},1,{},{} }]:std()
+
+mean_std = {m = mean, s = std}
+torch.save(paths.concat(opt.save, 'mean_std'), mean_std)
+
 trainData.data[{ {},1,{},{} }]:add(-mean)
 trainData.data[{ {},1,{},{} }]:div(std)
 
