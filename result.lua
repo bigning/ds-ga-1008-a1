@@ -20,7 +20,7 @@ cmd:text('Options:')
 cmd:option('-model_path', 'results/model.net', 'trained model path')
 cmd:option('-mean_std', 'results/mean_std', 'training data mean and std')
 cmd:option('-data', 'mnist.t7/test_32x32.t7', 'test data')
-cmd:option('-type', 'double', 'type:double | float | cuda')
+cmd:option('-type', 'float', 'type:double | float | cuda')
 cmd:option('-save_path', 'results/sample_submission.csv', 'save path')
 cmd:text()
 
@@ -35,41 +35,43 @@ end
 
 print('==> loading data')
 loaded = torch.load(opt.data, 'ascii')
+loaded.data = loaded.data:float()
+loaded.labels = loaded.labels:float()
 test_data = {data = loaded.data, labels = loaded.labels,
-             size = function() return loaded.data:size(1)}
+             size = function() return loaded.data:size(1) end }
 
 print('==> preprocessing data: normalize globally')
-test_data:add(-mean_std.m)
-test_data:div(mean_std.s)
+test_data.data[{{}, 1, {}, {}}]:add(-mean_std.m)
+test_data.data[{{}, 1, {}, {}}]:div(mean_std.s)
 
 print('==> preprocessing data: normalize locally')
 neighborhood = image.gaussian1D(7)
 normalization = nn.SpatialContrastiveNormalization(1, neighborhood, 1):float()
 
-for i = 1, test_data.size() do
-    test_data.data[{i, {1}, {}, {}}] = normalization:forward(test_data[{i, {1}, {}, {}}])
+for i = 1, test_data:size() do
+    test_data.data[{i, {1}, {}, {}}] = normalization:forward(test_data.data[{i, {1}, {}, {}}])
 end
 
 classes = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
 confusion = optim.ConfusionMatrix(classes)
 
 file = io.open(opt.save_path, 'w')
-io.output(file)
-io.write('Id,Prediction\n')
-
 print('==> test data forwarding')
-net.evaluate()
+file:write('Id,Prediction\n')
+
+net:evaluate()
 for t = 1, test_data.size() do
     xlua.progress(t, test_data:size())
-    local input = test_data[t]
+    local input = test_data.data[t]
     if opt.type == 'double' then input = input:double()
     elseif opt.type == 'cuda' then input = input:cuda() end
     local target = test_data.labels[t]
 
     pred = net:forward(input)
+    m,p = pred:max(1)
     confusion:add(pred, target)
-    io.write(t .. ',' .. pred .. '\n')
+    file:write(t .. ',' .. p[1] .. '\n')
 end
-io.close(file)
+file:close(file)
 print(confusion)
 

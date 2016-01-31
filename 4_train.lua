@@ -177,7 +177,7 @@ function train()
                        return f,gradParameters
                     end
 
-      -- optimize on current mini-batch
+      -- optimize on currthen
       if optimMethod == optim.asgd then
          _,_,average = optimMethod(feval, parameters, optimState)
       else
@@ -204,7 +204,13 @@ function train()
    local filename = paths.concat(opt.save, 'model.net')
    os.execute('mkdir -p ' .. sys.dirname(filename))
    print('==> saving model to '..filename)
-   torch.save(filename, model)
+   if opt.type == 'cuda' then
+       cpu_model = model:clone()
+       cpu_model:float()
+       torch.save(filename, cpu_model)
+   else
+       torch.save(filename, model)
+   end
 
    -- next epoch
    confusion:zero()
