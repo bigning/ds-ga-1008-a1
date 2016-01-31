@@ -21,7 +21,7 @@ cmd:option('-model_path', 'results/model.net', 'trained model path')
 cmd:option('-mean_std', 'results/mean_std', 'training data mean and std')
 cmd:option('-data', 'mnist.t7/test_32x32.t7', 'test data')
 cmd:option('-type', 'float', 'type:double | float | cuda')
-cmd:option('-save_path', 'results/sample_submission.csv', 'save path')
+cmd:option('-save_path', 'results/predictions.csv', 'save path')
 cmd:text()
 
 opt = cmd:parse(arg or {})
