@@ -80,21 +80,36 @@ elseif opt.model == 'convnet' then
 
       -- stage 1 : filter bank -> squashing -> L2 pooling -> normalization
       model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize))
-      --model:add(nn.Tanh())
-      model:add(nn.ReLU())
+      if opt.non_linear == 'tanh' then
+	      model:add(nn.Tanh())
+      elseif opt.non_linear == 'relu' then
+	      model:add(nn.ReLU())
+      elseif opt.non_linear == 'sigmoid' then
+	      model:add(nn.Sigmoid())
+      end
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
 
       -- stage 2 : filter bank -> squashing -> L2 pooling -> normalization
       model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize))
-      --model:add(nn.Tanh())
-      model:add(nn.ReLU())
+      if opt.non_linear == 'tanh' then
+	      model:add(nn.Tanh())
+      elseif opt.non_linear == 'relu' then
+	      model:add(nn.ReLU())
+      elseif opt.non_linear == 'sigmoid' then
+	      model:add(nn.Sigmoid())
+      end
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
 
       -- stage 3 : standard 2-layer neural network
       model:add(nn.View(nstates[2]*filtsize*filtsize))
       model:add(nn.Linear(nstates[2]*filtsize*filtsize, nstates[3]))
-      --model:add(nn.Tanh())
-      model:add(nn.ReLU())
+      if opt.non_linear == 'tanh' then
+	      model:add(nn.Tanh())
+      elseif opt.non_linear == 'relu' then
+	      model:add(nn.ReLU())
+      elseif opt.non_linear == 'sigmoid' then
+	      model:add(nn.Sigmoid())
+      end
       model:add(nn.Linear(nstates[3], noutputs))
 
    else
@@ -112,20 +127,39 @@ elseif opt.model == 'convnet' then
 
       -- stage 1 : filter bank -> squashing -> L2 pooling -> normalization
       model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize))
-      model:add(nn.Tanh())
+      if opt.non_linear == 'tanh' then
+	      model:add(nn.Tanh())
+      elseif opt.non_linear == 'relu' then
+	      model:add(nn.ReLU())
+      elseif opt.non_linear == 'sigmoid' then
+	      model:add(nn.Sigmoid())
+      end
+
       model:add(nn.SpatialLPPooling(nstates[1],2,poolsize,poolsize,poolsize,poolsize))
       model:add(nn.SpatialSubtractiveNormalization(nstates[1], normkernel))
 
       -- stage 2 : filter bank -> squashing -> L2 pooling -> normalization
       model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize))
-      model:add(nn.Tanh())
+      if opt.non_linear == 'tanh' then
+	      model:add(nn.Tanh())
+      elseif opt.non_linear == 'relu' then
+	      model:add(nn.ReLU())
+      elseif opt.non_linear == 'sigmoid' then
+	      model:add(nn.Sigmoid())
+      end
       model:add(nn.SpatialLPPooling(nstates[2],2,poolsize,poolsize,poolsize,poolsize))
       model:add(nn.SpatialSubtractiveNormalization(nstates[2], normkernel))
 
       -- stage 3 : standard 2-layer neural network
       model:add(nn.Reshape(nstates[2]*filtsize*filtsize))
       model:add(nn.Linear(nstates[2]*filtsize*filtsize, nstates[3]))
-      model:add(nn.Tanh())
+      if opt.non_linear == 'tanh' then
+	      model:add(nn.Tanh())
+      elseif opt.non_linear == 'relu' then
+	      model:add(nn.ReLU())
+      elseif opt.non_linear == 'sigmoid' then
+	      model:add(nn.Sigmoid())
+      end
       model:add(nn.Linear(nstates[3], noutputs))
    end
 else

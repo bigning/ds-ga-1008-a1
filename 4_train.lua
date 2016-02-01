@@ -166,6 +166,9 @@ function train()
                           model:backward(inputs[i], df_do)
 
                           -- update confusion
+                          if output:nDimension() == 2 then
+                              output = output:reshape(output:size(2))
+                          end
                           confusion:add(output, targets[i])
                        end
 

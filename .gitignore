@@ -2,3 +2,7 @@
 results*
 test*
 mnist*
+*sh
+*result
+nohup*
+*log*

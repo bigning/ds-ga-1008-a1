@@ -45,34 +45,40 @@ if not paths.filep(train_file) or not paths.filep(test_file) then
    os.execute('tar xvf ' .. paths.basename(tar))
 end
 
-----------------------------------------------------------------------
--- training/test size
-
-if opt.size == 'full' then
-   print '==> using regular, full training data'
-   trsize = 60000
-   tesize = 10000
-elseif opt.size == 'small' then
-   print '==> using reduced training data, for fast experiments'
-   trsize = 6000
-   tesize = 1000
-end
 
 ----------------------------------------------------------------------
 print '==> loading dataset'
 
 loaded = torch.load(train_file, 'ascii')
+loaded.data = loaded.data:float()
+
+trsize = 55000
+tesize = 5000
+train_data = torch.Tensor(trsize, loaded.data:size(2), loaded.data:size(3), loaded.data:size(4))
+test_data = torch.Tensor(tesize, loaded.data:size(2), loaded.data:size(3), loaded.data:size(4))
+train_label = torch.ByteTensor(trsize)
+test_label = torch.ByteTensor(tesize)
+shuffle = torch.randperm(60000)
+print(loaded)
+for i = 1, trsize do
+    train_data[i] = loaded.data[shuffle[i]]:clone()
+    train_label[i] = loaded.labels[shuffle[i]]
+end
+for i = 1, tesize do
+    test_data[i] = loaded.data[shuffle[i + trsize]]:clone()
+    test_label[i] = loaded.labels[shuffle[i + trsize]]
+end
+
 trainData = {
-   data = loaded.data,
-   labels = loaded.labels,
-   size = function() return trsize end
+    data = train_data,
+    labels = train_label,
+    size = function() return trsize end
 }
 
-loaded = torch.load(test_file, 'ascii')
 testData = {
-   data = loaded.data,
-   labels = loaded.labels,
-   size = function() return tesize end
+    data = test_data,
+    labels = test_label, 
+    size = function() return tesize end
 }
 
 ----------------------------------------------------------------------
@@ -113,6 +119,7 @@ mean = trainData.data[{ {},1,{},{} }]:mean()
 std = trainData.data[{ {},1,{},{} }]:std()
 
 mean_std = {m = mean, s = std}
+os.execute('mkdir -p ' .. sys.dirname(opt.save .. '/mean_std'))
 torch.save(paths.concat(opt.save, 'mean_std'), mean_std)
 
 trainData.data[{ {},1,{},{} }]:add(-mean)

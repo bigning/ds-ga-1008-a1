@@ -40,6 +40,9 @@ function test()
 
       -- test sample
       local pred = model:forward(input)
+      if pred:nDimension() == 2 then
+          pred = pred:reshape(pred:size(2))
+      end
       confusion:add(pred, target)
    end
 

@@ -29,7 +29,7 @@ cmd:text('Options:')
 cmd:option('-seed', 1, 'fixed input seed for repeatable experiments')
 cmd:option('-threads', 2, 'number of threads')
 -- data:
-cmd:option('-size', 'full', 'how many samples do we load: small | full')
+--cmd:option('-size', 'full', 'how many samples do we load: small | full')
 -- model:
 cmd:option('-model', 'convnet', 'type of model to construct: linear | mlp | convnet')
 -- loss:
@@ -46,6 +46,7 @@ cmd:option('-t0', 1, 'start averaging at t0 (ASGD only), in nb of epochs')
 cmd:option('-maxIter', 2, 'maximum nb of iterations for CG and LBFGS')
 cmd:option('-type', 'double', 'type: double | float | cuda')
 cmd:option('-epoches', 5, 'epoches')
+cmd:option('-non_linear', 'tanh', 'non-linear transformation(convnet only): tanh, relu,sigmoid')
 cmd:text()
 opt = cmd:parse(arg or {})
 
